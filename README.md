@@ -15,7 +15,11 @@ resource "zabbix_host" "zabbix1" {
     ip = "127.0.0.1"
     main = true
   }]
-  groups = ["Linux servers"]
+  groups = ["Linux servers", "${zabbix_host_group.zabbix.name}"]
   templates = ["Template ICMP Ping"]
+}
+
+resource "zabbix_host_group" "zabbix" {
+  name = "something"
 }
 ```
