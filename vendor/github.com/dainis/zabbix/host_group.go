@@ -73,6 +73,12 @@ func (api *API) HostGroupsCreate(hostGroups HostGroups) (err error) {
 	return
 }
 
+// Wrapper for hostgroup.update: https://www.zabbix.com/documentation/2.2/manual/api/reference/hostgroup/update
+func (api *API) HostGroupsUpdate(hostGroups HostGroups) (err error) {
+	_, err = api.CallWithError("hostgroup.update", hostGroups)
+	return
+}
+
 // Wrapper for hostgroup.delete: https://www.zabbix.com/documentation/2.2/manual/appendix/api/hostgroup/delete
 // Cleans GroupId in all hostGroups elements if call succeed.
 func (api *API) HostGroupsDelete(hostGroups HostGroups) (err error) {
