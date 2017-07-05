@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"sync"
 
 	"github.com/hashicorp/terraform/config/module"
@@ -20,6 +21,10 @@ func init() {
 
 // Plan represents a single Terraform execution plan, which contains
 // all the information necessary to make an infrastructure change.
+//
+// A plan has to contain basically the entire state of the world
+// necessary to make a change: the state, diff, config, backend config, etc.
+// This is so that it can run alone without any other data.
 type Plan struct {
 	Diff    *Diff
 	Module  *module.Tree
@@ -27,18 +32,43 @@ type Plan struct {
 	Vars    map[string]interface{}
 	Targets []string
 
+	// Backend is the backend that this plan should use and store data with.
+	Backend *BackendState
+
 	once sync.Once
 }
 
 // Context returns a Context with the data encapsulated in this plan.
 //
 // The following fields in opts are overridden by the plan: Config,
-// Diff, State, Variables.
+// Diff, Variables.
+//
+// If State is not provided, it is set from the plan. If it _is_ provided,
+// it must be Equal to the state stored in plan, but may have a newer
+// serial.
 func (p *Plan) Context(opts *ContextOpts) (*Context, error) {
 	opts.Diff = p.Diff
 	opts.Module = p.Module
-	opts.State = p.State
 	opts.Targets = p.Targets
+
+	// If we are given a state in "base" then we'll use it, and otherwise
+	// we'll fall back on the state stashed in the plan. We do this because
+	// sometimes the caller has already persisted the plan's state by the
+	// time we get here, and we don't want to regress to the plan-time state
+	// serial if so.
+	if opts.State == nil {
+		opts.State = p.State
+	} else if !opts.State.Equal(p.State) {
+		// Even if we're overriding the state, it should be logically equal
+		// to what's in plan. The only valid change to have made by the time
+		// we get here is to have incremented the serial.
+		//
+		// Due to the fact that serialization may change the representation of
+		// the state, there is little chance that these aren't actually equal.
+		// Log the error condition for reference, but continue with the state
+		// we have.
+		log.Println("[ERROR] plan state and ContextOpts state are not equal")
+	}
 
 	opts.Variables = make(map[string]interface{})
 	for k, v := range p.Vars {
