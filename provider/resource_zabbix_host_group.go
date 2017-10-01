@@ -18,7 +18,7 @@ func resourceZabbixHostGroup() *schema.Resource {
 				Required:    true,
 				Description: "Name of the host group.",
 			},
-			"groupId": &schema.Schema{
+			"group_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: false,
 				Computed: true,
@@ -44,7 +44,7 @@ func resourceZabbixHostGroupCreate(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("Created host group, id is %s", groupId)
 
-	d.Set("groupId", groupId)
+	d.Set("group_id", groupId)
 	d.SetId(groupId)
 
 	return nil

@@ -44,7 +44,7 @@ var interfaceSchema *schema.Resource = &schema.Resource{
 			Default:  "agent",
 			ForceNew: true,
 		},
-		"interfaceId": &schema.Schema{
+		"interface_id": &schema.Schema{
 			Type:     schema.TypeString,
 			Computed: true,
 			ForceNew: true,
@@ -64,7 +64,7 @@ func resourceZabbixHost() *schema.Resource {
 				Required:    true,
 				Description: "Technical name of the host.",
 			},
-			"hostId": &schema.Schema{
+			"host_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Computed:    true,
 				ForceNew:    true,
@@ -324,7 +324,7 @@ func resourceZabbixHostCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("Created host id is %s", hosts[0].HostId)
 
-	d.Set("hostId", hosts[0].HostId)
+	d.Set("host_id", hosts[0].HostId)
 	d.SetId(hosts[0].HostId)
 
 	return nil
@@ -333,9 +333,9 @@ func resourceZabbixHostCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceZabbixHostRead(d *schema.ResourceData, meta interface{}) error {
 	api := meta.(*zabbix.API)
 
-	log.Printf("Will read host with id %s", d.Get("hostId").(string))
+	log.Printf("Will read host with id %s", d.Get("host_id").(string))
 
-	host, err := api.HostGetById(d.Get("hostId").(string))
+	host, err := api.HostGetById(d.Get("host_id").(string))
 
 	if err != nil {
 		return err
