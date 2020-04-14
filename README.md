@@ -1,5 +1,7 @@
 # Terraform zabbix provider
 
+Actively developed fork: https://github.com/claranet/terraform-provider-zabbix
+
 Allows to manage zabbix hosts
 
 ```
